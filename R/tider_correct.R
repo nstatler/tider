@@ -1,10 +1,12 @@
 #' Calculate Mean High Water spring, neap,
 #'
-#' During spring tides higher high tides are produced. This
-#' package calculates mean high water spring at a desired location.
-#' Since often only short term data is available, this package uses the
+#' This package calculates mean high water spring at a desired location.
+#' Since often only short term data is available, this function uses the
 #' simltaneous comparison method to compute the datum. Data from the desired location and a
-#' control station for the same time period is required.
+#' control station for the same time period is required. Any datum and units can be used
+#' to measure the water level data. Only water levels collected at
+#' 6 minute and 15 minute intervals. Does not check or handle gaps, this needs to be done
+#' before inputting data.
 #'
 #'
 #' @param df_sub data frame for subordinate/short term station
@@ -17,22 +19,26 @@
 #' @param s2_ctrl A numeric of the Prinicipal solor semidiurnal constituent from tAmatchhe nearest NOAA
 #'                control station.
 #' @param mn_ctrl A numeric of the Mean range of tide from nearest NOAA control station
+#' @param unit A character of the units of the water level data
 #' @param type the corrected value to return
-#' @return returns a numeric of the mean high water spring or neap
+#' @return returns a character of the mean high water spring or neap with units
 #' @export
 #' @examples
-#' i<-system.file("i.csv",package="tider")
-#' e<-system.file("e.csv",package="tider")
+#' i<-system.file("extdata","i.csv",package="tider")
+#' e<-system.file("extdata","e.csv",package="tider")
 #' i$DateTime <- lubridate::parse_date_time(paste(i$Date,i$Time),
 #'                                           "%m/%d/%y %H:%M:%S")
 #' e$DateTime <- lubridate::parse_date_time(paste(e$Date,e$Time),
 #'                                        "%m/%d/%y %H:%M:%S")
 #'
 #' m  <- tider_correct(i, e, "Level", "DateTime", "Level", "DateTime", (8.34-6.06),
-#'                      42, 4.53, "spring")
+#'                      .42, 4.53, "feet", "spring")
 
 tider_correct <- function(df_sub, df_ctrl,sub_level, sub_daytime, ctrl_level, ctrl_daytime,
-                          mhw_ctrl,s2_ctrl,mn_ctrl, type=c("spring","neap")){
+                          mhw_ctrl,s2_ctrl,mn_ctrl, unit, type=c("spring","neap")){
+
+  library(llubridate)
+  library(dplyr)
 
   type <- match.arg(type)
 
@@ -63,10 +69,10 @@ tider_correct <- function(df_sub, df_ctrl,sub_level, sub_daytime, ctrl_level, ct
   if(type=="spring"){
     #calculate monthly values
     mm_sub<-daily_sub %>%
-    group_by(Year=year(ymd), Month=month(ymd)) %>%
-    summarise(sum_hh = sum(higher_high),
-              sum_h= sum(high),
-              sum_l= sum(low),
+      group_by(Year=year(ymd), Month=month(ymd)) %>%
+      summarise(sum_hh = sum(higher_high),
+                sum_h= sum(high),
+                sum_l= sum(low),
                 sum_ll = sum(lower_low),
                 num_obs = NROW(high))
 
@@ -100,8 +106,12 @@ tider_correct <- function(df_sub, df_ctrl,sub_level, sub_daytime, ctrl_level, ct
     mn_sub <- mn_ctrl + means
 
     mhws  <- mn_sub/mn_ctrl * mhws_ctrl
+    mhws = paste(mhws, unit)
+
   } else if(type=="neap"){
 
   }
+
+
   return(mhws)
 }

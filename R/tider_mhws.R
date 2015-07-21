@@ -4,13 +4,17 @@
 #' to find the greatest tidal range that occur
 #' during new and full mmoons. Then averages the heights of the two successive high waters
 #' that occur in 24 hours when the tidal range is greatest. Then averages
-#' all of the spring high waters to get Mean High water spring.
+#' all of the spring high waters to get Mean High water spring. Any datum and units can
+#' be used to measure  the water level data. Only water levels collected at
+#' 6 minute and 15 minute intervals. Does not check or handle gaps, this needs to be done
+#' before inputting data.
 #'
 #' @param df data frame for the desired location
-#' @param level thecolumn containg gauge data
-#' @param daytime  the column containg daytime values
+#' @param level character of the column containg gauge data
+#' @param daytime  a character of the column containg daytime values
+#' @param unit a character of the units of the water level data
 #' @param phase_lag a numeric that tells phase lag, default is one
-#' @return returns a numeric of the mean high water spring
+#' @return returns a character of the mean high water spring with units
 #'df$DateTime <- lubridate::parse_date_time(paste(df$Date,df$Time),
 #'                                           "%m/%d/%y %H:%M:%S")
 #' @examples
@@ -18,10 +22,10 @@
 #' i$DateTime <- lubridate::parse_date_time(paste(i$Date,i$Time),
 #'                                           "%m/%d/%y %H:%M:%S")
 #'
-#'  k  <- tide_mhws(i, "Level", "DateTime")
+#'  k  <- tider_mhws(i, "Level", "DateTime", "cm")
 #'
 
-tider_mhws  <- function(df, level, daytime, phase_lag=1){
+tider_mhws  <- function(df, level, daytime, unit,  phase_lag=1){
 
   library(tider)
   library(chron)
@@ -166,5 +170,7 @@ tider_mhws  <- function(df, level, daytime, phase_lag=1){
     jd = jd + 15
   }
   mhws = sum(sgt$sum)/(NROW(sgt)*2)
+  mhws = paste(mhws, unit)
+
   return(mhws)
 }
