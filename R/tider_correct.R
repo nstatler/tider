@@ -37,7 +37,7 @@
 tider_correct <- function(df_sub, df_ctrl,sub_level, sub_daytime, ctrl_level, ctrl_daytime,
                           mhw_ctrl,s2_ctrl,mn_ctrl, unit, type=c("spring","neap")){
 
-  library(llubridate)
+  library(lubridate)
   library(dplyr)
 
   type <- match.arg(type)

@@ -170,7 +170,6 @@ tider_mhws  <- function(df, level, daytime, unit,  phase_lag=1){
     jd = jd + 15
   }
   mhws = sum(sgt$sum)/(NROW(sgt)*2)
-  mhws = paste(mhws, unit)
-
+  mhws = paste(mhws, unit) #sets units
   return(mhws)
 }
